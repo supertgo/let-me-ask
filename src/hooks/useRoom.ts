@@ -16,7 +16,6 @@ type QuestionType = {
   likeId: string | undefined;
 };
 
-
 type FirebaseQuestions = Record<
   string,
   {
@@ -27,17 +26,20 @@ type FirebaseQuestions = Record<
     content: string;
     isAnswered: boolean;
     isHighlighted: boolean;
-    likes: Record<string, {
-      authorId: string,
-    }>
+    likes: Record<
+      string,
+      {
+        authorId: string;
+      }
+    >;
   }
 >;
 
-export function useRoom (roomId: string) {
+export function useRoom(roomId: string) {
   const { user } = useAuth();
   const [questions, setQuestions] = useState<QuestionType[]>([]);
   const [title, setTitle] = useState("");
-  
+
   useEffect(() => {
     const roomRef = database.ref(`rooms/${roomId}`);
 
@@ -53,18 +55,21 @@ export function useRoom (roomId: string) {
             isHighlighted: value.isHighlighted,
             isAnswered: value.isAnswered,
             likeCount: Object.values(value.likes ?? {}).length,
-            likeId: Object.entries(value.likes ?? {}).find(([key, like ]) => like.authorId === user?.id)?.[0],
+            likeId: Object.entries(value.likes ?? {}).find(
+              ([key, like]) => like.authorId === user?.id
+            )?.[0],
           };
-        });
+        }
+      );
 
       setTitle(databaseRoom.title);
       setQuestions(parsedQuestions);
     });
 
     return () => {
-      roomRef.off('value');
-    }
+      roomRef.off("value");
+    };
   }, [roomId, user?.id]);
 
-  return { questions, title }
+  return { questions, title };
 }
